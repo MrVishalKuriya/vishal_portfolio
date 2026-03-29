@@ -10,19 +10,21 @@ const logger = winston.createLogger({
     winston.format.json()
   ),
   defaultMeta: { service: 'vishal-portfolio-api' },
+  // Default to console transport for Vercel/Production
   transports: [
-    new winston.transports.File({ filename: 'logs/error.log', level: 'error' }),
-    new winston.transports.File({ filename: 'logs/combined.log' }),
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      ),
+    })
   ],
 });
 
+// Only write physical files if we are running locally in development
 if (env.NODE_ENV !== 'production') {
-  logger.add(new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    ),
-  }));
+  logger.add(new winston.transports.File({ filename: 'logs/error.log', level: 'error' }));
+  logger.add(new winston.transports.File({ filename: 'logs/combined.log' }));
 }
 
 export { logger };
